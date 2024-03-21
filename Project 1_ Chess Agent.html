@@ -1,0 +1,337 @@
+
+<!-- saved from url=(0065)http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Project 1: Chess Agent</title>
+<link rel="stylesheet" type="text/css" href="./Project 1_ Chess Agent_files/reset.css">
+<link rel="stylesheet" type="text/css" href="./Project 1_ Chess Agent_files/ll.css">
+<link rel="stylesheet" type="text/css" href="./Project 1_ Chess Agent_files/syllabus.css">
+
+</head>
+<body>
+<div id="body">
+
+<h1>Project 1: Chess Agent</h1>
+
+<p>During this project, you will exercise what you have learned about representation and search by creating a simple Chess-playing program.
+This project provides a model of the state space of <a href="http://en.wikipedia.org/wiki/Chess">Chess</a>, and it is your job to write a
+program that explores that space efficiently and decides what moves to make to defeat other programs.</p>
+<img src="./Project 1_ Chess Agent_files/chess.png" width="1000px" class="centered">
+
+<p>Before you start, you may want to get familiar with the basics of <a href="http://en.wikipedia.org/wiki/Chess">Chess</a>. You do not need to know specific details
+or become a skilled Chess player to complete this project, but a high-level understanding of the basic rules of the game may be helpful.
+You should also review the readings and lecture notes on <a href="https://en.wikipedia.org/wiki/Minimax">Adversarial Search</a> (AIMA sections 5.1, 5.2, and 5.3).</p>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl#ChessFramework">Chess Framework</a></li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl#Assignment">Assignment</a></li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl#Grading">Grading</a></li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl#AbouttheAgents">About the Agents</a></li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl#ClassTournament">Class Tournament</a></li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/index.syl#HelpandHints">Help and Hints</a></li>
+</ul>
+
+<h2 id="ChessFramework">Chess Framework</h2>
+
+<p>To use the Chess framework, you either need to download the source and executables or use the <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/index.syl">pre-configured IDE provided by your instructor</a>.</p>
+
+<h3>Source and Executables</h3>
+
+<p>If you are <i>not</i> using the pre-configured IDE, you will need to download the components of the Chess framework:</p>
+<ul>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/chess.jar">chess.jar</a>: the implementation of the rules of chess and the GUI.</li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/agents.zip">agents.zip</a>: six example Chess agents.</li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/Random.zip">Random.zip</a>: the source code for the Random agent (optional).</li>
+</ul>
+<p>Extract <tt>agents.zip</tt> into the same directory as <tt>chess.jar</tt>. It contains 6 <tt>.jar</tt> files which are each Chess-playing programs, or agents.
+To see a sample tournament between some of these agents, open a terminal window and execute the following command:</p>
+<pre>java -jar chess.jar -g 1 -a agents/random.jar agents/greedy.jar agents/novice.jar
+</pre>
+<p>This tells the Chess program to run a tournament between three agents: Random, Greedy, and Novice.  Each pair of agents will play 2 games
+against one another, one as white and one as black.</p>
+<p>A transcript of each game is shown to the right of the board (in <a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">Portable Game Notation</a>)
+and the final results of the tournament are given once all games have been played.  If you run the command above, Novice should come in first
+with 4 points, Greedy second with 1.5 points, and Random last with 0.5 points. 1 point is awarded for a win, and 0.5 points is awarded for a
+draw or stalemate.</p>
+<p>Include <tt>human.jar</tt> in the list of agents to add a human player. For example, to play 2 games between two human players:</p>
+<pre>java -jar chess.jar -g 1 -a agents/human.jar agents/human.jar
+</pre>
+<p>To play against the Novice agent:</p>
+<pre>java -jar chess.jar -g 1 -a agents/human.jar agents/novice.jar
+</pre>
+<p>If the agents are taking a long time to decide on moves, you can try increasing the amount of memory that the Java virtual machine uses.
+The <tt>-Xms</tt> command line argument specifies the minimum amount of memory to use, and the <tt>-Xmx</tt> command line argument specifies the maximum
+amount to use.  You can also allocate more space to young generation objects using <tt>-XX:NewSize</tt> command line argument to save on
+garbage collection time.  To run the above example with exactly 4 gigabytes of memory, 3 of which are used for new objects:</p>
+<pre>java -Xms4g -Xmx4g -XX:NewSize=3g -jar chess.jar -g 2 -a agents/random.jar agents/greedy.jar agents/novice.jar
+</pre>
+
+<h3>Pre-Configured IDE</h3>
+
+<p>The Chess framework is included in the <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/index.syl">course programming projects</a>. The relevant projects are:</p>
+<ul>
+<li><i>Example Chess Agent</i>: This is the source code for a Chess agent that chooses moves at random. You may want to rename this project and use it as a basis for your agent.</li>
+<li><i>Test Chess Agents</i>: Run <tt>Test.java</tt> to see a full tournament of all agents, including the example agent.</li>
+</ul>
+<p>Note that you can comment out lines in <tt>Test.java</tt> to modify which agents participate in the tournament. While you are testing your agent,
+you might only want to compete against one agent at a time. Generally, if you can beat Greedy, you can also beat Random, and if you can beat
+Novice you can also be Greedy, etc., though it is good idea to run a full tournament before submitting your project.</p>
+<p>It is recommended that you rename the Example Chess Agent project to reflect your name:</p>
+<ul>
+<li>Right click on the project.</li>
+<li>Choose <tt>Refactor &gt; Rename</tt></li>
+</ul>
+
+<h3>Documentation</h3>
+
+<p>Regardless of how you use the framework, the <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc">documentation</a> will be helpful. Some of the more important classes are:</p>
+<ul>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/Agent.html"><tt>Agent</tt></a>: represents a decisions-maker, which should be able to play as either white or black.</li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html"><tt>State</tt></a>: represents a specific moment between moves during a game of Chess. States are the nodes
+in the space you will be searching.</li>
+<li><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Board.html"><tt>Board</tt></a> and <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Piece.html"><tt>Piece</tt></a>: give details on the position and type
+of each piece in the current state.</li>
+</ul>
+
+<h2 id="Assignment">Assignment</h2>
+
+<p>Your assignment is to write your own Chess agent. Do this by creating a <tt>.jar</tt> file which contains (at the top level) any class which is
+a subclass of <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/Agent.html"><tt>edu.uky.ai.chess.Agent</tt></a>.  It must override
+the <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/Agent.html#chooseMove(edu.uky.ai.chess.state.State)"><tt>chooseMove</tt></a> method.</p>
+<p>You <i>must</i> name your agent according to your LinkBlue ID. In the Example Chess Agent project, this means changing the name of the agent
+from <tt>"Example"</tt> to your LinkBlue ID in the constructor. My LinkBlue ID is <tt>swa378</tt>, so the constructor for my agent would look like this:</p>
+<pre>public ExampleAgent() {
+    super("swa378");
+}
+</pre>
+<p>Your agent should explore the state space of Chess and make intelligent decisions about which move to make next. You should start in the
+<a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/Agent.html#chooseMove(edu.uky.ai.chess.state.State)"><tt>chooseMove</tt></a> method. This methods takes a
+<a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html"><tt>State</tt></a> as input and should return one of its child states (thus indicating which move to make next).</p>
+<p>The number of states you may explore is <i>limited to 500,000</i>, and you may not take more than 5 minutes to decide on a move. This means you
+need to explore the space as efficiently as possible.  If you exceed the search limit or time limit, your agent will throw an exception
+and forfeit the current game. Note that these limitations apply <i>per move</i>, not per game (i.e. you may explore 500k states every time you decide
+on a move).</p>
+<p>When you have finished your agent, you can export it from the pre-configured IDE as a <tt>.jar</tt> file like this:</p>
+<ul>
+<li>Right click on the project and choose <tt>Export</tt>.</li>
+<li>Under the <tt>Java</tt> category, choose <tt>JAR file</tt> and click <tt>Next</tt>.</li>
+<li>Expand "Example Chess Agent" and uncheck the box for the "Test Chess Agents" project.
+<img src="./Project 1_ Chess Agent_files/uncheck.png" class="centered"></li>
+<li>Choose the destination for the exported file, making sure that it is named with your LinkBlue ID and ends in <tt>.jar</tt>.</li>
+<li>Click <tt>Finish</tt>.</li>
+</ul>
+<p>Since my LinkBlue ID is <tt>swa378</tt>, the name of my agent's executable will be <tt>swa378.jar</tt>.</p>
+<p>You must also submit your source code. From the pre-configured IDE:</p>
+<ul>
+<li>Right click on the project and choose <tt>Export</tt>.</li>
+<li>Under the <tt>General</tt> category, choose <tt>Archive File</tt> and click <tt>Next</tt>.</li>
+<li>Choose the destination for the exported file, making sure that it is named with your LinkBlue ID and ends in <tt>.zip</tt>.</li>
+<li>Click <tt>Finish</tt>.</li>
+</ul>
+<p>Since my LinkBlue ID is <tt>swa378</tt>, my project source archive name will be <tt>swa378.zip</tt>.</p>
+<p>You will need to submit both the agent <tt>jar</tt> file and the source <tt>zip</tt> file on Canvas. If you submit only one, your project will not be graded.</p>
+
+<h2 id="Grading">Grading</h2>
+
+<p>This is how your project will be graded: First, I will download your <tt>jar</tt> file and place it in a directory that matches your LinkBlue ID.
+Then I will run the following command, substituting your ID for mine:</p>
+<pre>java -Xms4g -Xmx4g -XX:NewSize=3g -jar chess.jar -a swa378/swa378.jar agents/random.jar agents/greedy.jar agents/novice.jar agents/beginner.jar agents/intermediate.jar -g 1 -nl 500000 -tl 300000 -o results.html -b
+</pre>
+<p>This means that your agent will play in a tournament against the five AI agents I have provided. Your agent will play 2 games against each opponent,
+one as white and one as black.</p>
+<p>Agents are ranked according to these criteria:</p>
+<ul>
+<li>The agent with more points is ranked higher.</li>
+<li>In case of a tie, the agent that made fewer total moves is ranked higher.</li>
+<li>In case of a further tie, the agent that explored fewer total <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html">states</a> is ranked higher.</li>
+</ul>
+<p>Your grade will be determined by your score in the tournament:</p>
+<table>
+<tbody><tr><th>Your agent...</th><th>Undergraduate Grade</th><th>Honors/Graduate Grade</th></tr>
+<tr><td>Beats Intermediate</td><td>A (105%)</td><td>A (100%)</td></tr>
+<tr><td>Beats Beginner</td><td>A (100%)</td><td>B (80%)</td></tr>
+<tr><td>Beats Novice</td><td>B (80%)</td><td>C (70%)</td></tr>
+<tr><td>Beats Greedy</td><td>C (70%)</td><td>D (60%)</td></tr>
+<tr><td>Beats Random</td><td>D (60%)</td><td>E (50%)</td></tr>
+<tr><td>Compiles and runs without crashing</td><td>E (50%)</td><td>E (0%)</td></tr>
+</tbody></table>
+<p>Please observe the following requirements when submitting your project:</p>
+<ul>
+<li>Submit your project on Canvas by the deadline.</li>
+<li>Submit your <tt>jar</tt> file, named for your LinkBlue ID (e.g. <tt>swa378.jar</tt>).
+If your agent does not load correctly or throws an exception during play, you will receive an E for this project.</li>
+<li>Submit the source code for your agent as a <tt>zip</tt> archive.  It must be named for your LinkBlue ID (e.g. <tt>swa378.zip</tt>).
+If I cannot open and read your source code, it will not be graded.</li>
+<li>You must perform your search by expanding and searching the provided <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html">state</a>
+objects. Do not circumvent the 500,000 node search limit or 5 minute time limit by, for example, creating your own <tt>State</tt> class which
+does not obey the limit, or by using Java reflection to override the limit. Circumventing the node limit will be considered cheating.
+(Note: it is very difficult to do this on accident, so unless you're explicitly trying to break this rule, you probably won't.)</li>
+</ul>
+
+<h2 id="AbouttheAgents">About the Agents</h2>
+
+<p>Here is some information about your opponents which you may find helpful when designing your agent:</p>
+<ul>
+<li><i>Random</i> chooses moves at random. The random number generator always starts with the same seed, so all else being equal, Random will make the same moves every time.</li>
+<li><i>Greedy</i> always chooses the move which maximizes its total <a href="http://en.wikipedia.org/wiki/Chess_piece_relative_value">material</a> score.
+If it has multiple moves that result in the same score, it chooses at random between them.</li>
+<li><i>Novice</i> uses <a href="http://en.wikipedia.org/wiki/Minimax">MinMax search</a> with <a href="http://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning">Alpha Beta Pruning</a>
+to look 1 turn ahead (i.e. 2 ply or 1 move for each player) and choose the move which will maximize its material score.</li>
+<li><i>Beginner</i> uses <a href="http://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search">iterative deepening</a> MinMax search with Alpha Beta Pruning
+to look 2 turns (i.e. 4 ply) ahead and choose the move which will maximize its material score.</li>
+<li><i>Intermediate</i> uses iterative deepening MinMax search with Alpha Beta Pruning to look 3 turns ahead (when possible).
+Its search is also <a href="https://www.chessprogramming.org/Quiescence_Search">quiescent</a>.</li>
+</ul>
+
+<h2 id="ClassTournament">Class Tournament</h2>
+
+<p>Every agent which runs without throwing an exception will be entered into a class-wide Chess tournament (2 games between each pair of agents).
+The first, second, and third place winners of this tournament will receive bonus points on this project.</p>
+
+<h2 id="HelpandHints">Help and Hints</h2>
+
+
+<h3>Help! I don't know where to start!</h3>
+
+<p>I recommend that you tackle this project in parts rather than trying to start by writing an agent that beats Intermediate.</p>
+<ul>
+<li>Start by writing your utility function. Then write an agent that enumerates all the possible next moves it can make and, if playing
+white, chooses the highest utility, and if playing black, chooses the lowest. This agent should be able to beat Random.</li>
+<li>Once you're confident your utility function is working, implement MinMax search (without Alpha Beta pruning) with a max depth of 2
+(i.e. look 2 moves ahead). This agent should beat Greedy.</li>
+<li>Once that's working, implement an agent that first looks 2 moves ahead (like above) and then, if it has budget leftover, looks 4
+moves ahead. This agent should beat Novice.</li>
+<li>Once that's working, add Alpha Beta pruning to your implementation. It should make exactly the same moves, but faster.</li>
+<li>Once you're confident MinMax with Alpha Beta is working, implement iterative deepening. This agent should beat Beginner.</li>
+</ul>
+
+<h3>Running the tournament takes forever!</h3>
+
+<p>Intermediate Bot takes the longest to decide on its moves.</p>
+<p>You can run the tournament from <tt>Test.java</tt> in the "Test Chess Agents" project. In <tt>Test.java</tt>, you can comment out Intermediate Bot to
+prevent it from playing in the tournament. Be sure to put it back in when you run your final tests, but while you are working you can play
+a much faster tournament by temporarily removing that agent.</p>
+
+<h3>How can I find out how many pieces of what type are on the board?</h3>
+
+<p>The <a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Board.html">board</a> object implements <tt>Iterable&lt;<a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Piece.html">Piece</a>&gt;</tt>. This means you can treat
+a board like a list of piece objects. You can use the Java <tt>instanceof</tt> keyword to find out if each piece is a <tt>King</tt>, <tt>Queen</tt>, <tt>Rook</tt>, etc.</p>
+<p>Here are two functions that might be helpful if you want to calculate material score:</p>
+<pre>private static int material(Board board, Player player) {
+	int material = 0;
+	for(Piece piece : board)
+		if(piece.player == player)
+			material += value(piece);
+	return material;
+}
+</pre>
+<pre>private static int value(Piece piece) {
+	if(piece instanceof Pawn)
+		return 1;
+	else if(piece instanceof Knight)
+		return 3;
+	else if(piece instanceof Bishop)
+		return 3;
+	else if(piece instanceof Rook)
+		return 5;
+	else if(piece instanceof Queen)
+		return 9;
+	// The piece must be a King.
+	else
+		return 100;
+}
+</pre>
+
+<h3>Don't compare strings in Java using the double equal sign.</h3>
+
+<p>In Java, the <tt>==</tt> operator (double equal sign) compares whether two things are exactly the same. It is possible for two strings to be different
+objects even when they have the same letters. If that happens, <tt>==</tt> will return <tt>false</tt>.</p>
+<pre>// This is incorrect.
+if(board.player.toString() == "WHITE")
+	return "I am playing as white!";
+</pre>
+<p>The above code actually does work in some cases because of <a href="https://www.geeksforgeeks.org/interning-of-string/">string internament in the Java compiler</a>, but
+it's a bad habbit to get into, especially when dealing with non-string objects.</p>
+<p>To compare two objects, you need to use <tt>Object#equals(Object)</tt>.</p>
+<pre>// This is correct.
+if(board.player.toString().equals("WHITE"))
+	return "I am playing as white!";
+</pre>
+<p>In this particular case, there is an even better way to make the comparison. The <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Player.html">Player</a></tt> enum defines two constants,
+<tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Player.html#WHITE">Player.WHITE</a></tt> and <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Player.html#BLACK">Player.BLACK</a></tt>. You can always safely compare
+these objects using the double equal sign.</p>
+<pre>// This is best.
+if(board.player == Player.WHITE)
+	return "I am playing as white!";
+</pre>
+
+<h3>How can I return multiple things from a method?</h3>
+
+<p>Methods in Java can only return one thing, but that one thing can be an object with multiple fields. For example, you might find a class like this helpful.
+The code needs to be in a new <tt>Result.java</tt> file in your project:</p>
+<pre>import edu.uky.ai.chess.state.State;
+
+public class Result {
+
+	public State state;
+	public double value;
+
+	public Result(State state, double value) {
+		this.state = state;
+		this.value = value;
+	}
+}
+</pre>
+<p>You can use the new class like this:</p>
+<pre>// A dummy method to demonstrate how to use the Result object.
+public Result returnTwoThings(State current) {
+	return new Result(current, 0.0);
+}
+</pre>
+
+<h3>I'm getting an error that says "Invalid move: XXX (not a child of the current state)."</h3>
+
+<p>Your <tt>chooseMove</tt> method needs to return a child of the state that it was given, which represents the move the agent is making.</p>
+<p>The most common cause of this problem is that you are doing some form of MinMax search and returning a leaf node at the bottom of the tree, rather than the
+move that will (hopefully) lead to that leaf. You might be looking 4 moves ahead, but you can't return a state that is 4 moves ahead; you need to return a
+state that is 1 move ahead. If this if your problem, you can simply walk back up the tree using <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html#previous">State.previous</a></tt>
+until you find a state whose previous state is current state.</p>
+
+<h3>My agent won't end the game, even when there's a clear opportunity to checkmate!</h3>
+
+<p>Assuming you are using some variation of MinMax search, you need to make sure that your utility function accounts for games that are over. If your utility
+function is, for example, just material score, then your agent won't want to end the game because it might have a chance to get more material! Why checkmate
+when you have the chance to promote a pawn to a Queen?</p>
+<p>There are 4 possible cases that your utility function needs to handle. The first 3 are cases where the game is over (i.e.
+<tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html#outcome">State.outcome</a></tt> is not <tt>null</tt>).</p>
+<ul>
+<li>Case 1: The game is a draw or stalemate, either because 100 moves have been made without a piece getting captured or because the same state was repeated 3
+times. The game is a draw when <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html#outcome">State.outcome</a></tt> is <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Outcome.html#DRAW">DRAW</a></tt>.
+A draw usually has a utility of 0.</li>
+<li>Case 2: White has checkmated Black and won the game. This occurs when <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html#outcome">State.outcome</a></tt> is
+<tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Outcome.html#WHITE_WINS">WHITE_WINS</a></tt>. This state is the best possible outcome for White, so be sure to return a value accordingly.</li>
+<li>Case 3: Black has checkmated White and won the game. This occurs when <tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html#outcome">State.outcome</a></tt> is
+<tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/Outcome.html#BLACK_WINS">BLACK_WINS</a></tt>. This state is the best possible outcome for Black, so be sure to return a value accordingly.</li>
+<li>Case 4: The game is not over. This is when you should return a number based on your utility function, such as material score.</li>
+</ul>
+<p>If your utility function is working properly, but your agents still take a long time to win, the problem could be that your agent does not pay attention
+to how far away the end of the game is. Assuming you are using material score as your utility function, MinMax thinks that a checkmate that is 3 moves away
+is equally as good as a checkmate that is 1 move away, but clearly we should prefer to checkmate sooner rather than later. When deciding which move is "best"
+you might want to add a tie breaker: when two moves have the same utility, prefer the one that is fewer moves away. You can do this easily by looking at the
+<tt><a href="http://cs.uky.edu/~sgware/courses/cs463g/projects/chess/doc/edu/uky/ai/chess/state/State.html#turn">State.turn</a></tt> counter.</p>
+
+<h3>My agent is making really bad moves!</h3>
+
+<p>There are many reasons why this could be happening, but here are two that I see frequently:</p>
+<ul>
+<li>Make sure you can play as both White and Black. In a typical MinMax implementation, White tries to get the highest utility score and Black tries to get
+the lowest utility score. If your agent always tries to get the highest utility score, when it plays as Black, it will make the worst possible move!</li>
+<li>Don't trust the result of a MinMax search if it didn't finish. If your agent ran out of resources in the middle of doing a MinMax search
+(even if you are using Alpha-Beta pruning), you can't necessarily trust the result it gave you. You can only trust the result if the search finished. This is
+why my agents use iterative deepening--to ensure that the first search will finish before trying a deeper search.</li>
+</ul>
+
+</div>
+
+</body></html>

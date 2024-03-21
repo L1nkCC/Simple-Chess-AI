@@ -1,0 +1,30 @@
+/* Linux Libertine Font */
+@font-face {
+	font-family: "Linux Libertine";
+	src: url("/~sgware/template/LinLibertine_R.woff") format('woff');
+}
+@font-face {
+	font-family: "Linux Libertine";
+	src: url("/~sgware/template/LinLibertine_RB.woff") format('woff');
+	font-weight: bold;
+}
+@font-face {
+	font-family: "Linux Libertine";
+	src: url("/~sgware/template/LinLibertine_RI.woff") format('woff');
+	font-style: italic;
+}
+@font-face {
+	font-family: "Linux Libertine";
+	src: url("/~sgware/template/LinLibertine_RBI.woff") format('woff');
+	font-weight: bold;
+	font-style: italic;
+}
+@font-face {
+	font-family: "Linux Libertine Semibold";
+	src: url("/~sgware/template/LinLibertine_RZ.woff") format('woff');
+}
+@font-face {
+	font-family: "Linux Libertine Semibold";
+	src: url("/~sgware/template/LinLibertine_RZI.woff") format('woff');
+	font-style: italic;
+}
